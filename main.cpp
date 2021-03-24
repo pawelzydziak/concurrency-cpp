@@ -7,8 +7,7 @@
 #include <chrono>
 using namespace std::chrono_literals;
 
-//// RW LOCK
-#pragma region
+#pragma region RW LOCK
 std::map<std::string,int> shoppingList{{"chleb",2},{"papryka",4},{"piwo",3}};
 
 std::shared_timed_mutex shoppingListMutex;
@@ -27,8 +26,7 @@ void getQuantity(const std::string& name){
 }
 #pragma endregion
 
-//// ATOMIC SP
-#pragma region
+#pragma region ATOMIC SP
 [[deprecated]]void smart() {
     std::shared_ptr<int> ptr = std::make_shared<int>(2011);
     for (auto i = 0;i < 10; i++)
@@ -61,8 +59,7 @@ void getQuantity(const std::string& name){
 }
 #pragma endregion
 
-//// LATCHES AND BARRIERS
-#pragma region
+#pragma region LATCHES AND BARRIERS
 #if 0
 // Latch
 void latchExample(threadpool* pool)
@@ -140,8 +137,7 @@ void flexBarrierExample()
 #endif
 #pragma endregion
 
-//// COROUTINES
-#pragma region
+#pragma region COROUTINES
 
 int func1()
 {
@@ -252,8 +248,8 @@ while (true)
  */
 
 #pragma endregion
-//// TRANSACTIONAL MEMORY
-#pragma region
+
+#pragma region TRANSACTIONAL MEMORY
 // ZMIENNA GLOBALNA
 int j= 0;
 
@@ -268,11 +264,12 @@ void increment()
 
 #pragma endregion
 
-//// TASK BLOCKS
+#pragma region TASK BLOCKS
 //TODO
+#pragma endregion
+
 int main()
 {
-
 #pragma region RW LOCK
 
     std::cout << std::endl;
@@ -329,6 +326,7 @@ int main()
     std::cout << "\n\n";
 
 #pragma endregion
+
 #pragma region Transactional
     // synchronized
     std::cout << std::endl;
@@ -345,5 +343,4 @@ int main()
 
     std::cout << "\n\n";
 #pragma endregion
-
 }
