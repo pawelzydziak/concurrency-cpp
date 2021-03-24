@@ -5,7 +5,7 @@
 #include <thread>
 #include <vector>
 #include <chrono>
-
+using namespace std::chrono_literals;
 
 //// RW LOCK
 #pragma region
@@ -65,28 +65,32 @@ void getQuantity(const std::string& name){
 #pragma region
 #if 0
 // Latch
-void DoWork(threadpool* pool) {
-    std::latch completion_latch(NTASKS);
-    for (int i = 0; i < NTASKS; ++i) {
+void latchExample(threadpool* pool)
+{
+    std::latch completion_latch(N); // ilosc taksów
+    for (int i = 0; i < N; ++i)
+    {
         pool->add_task([&] {
-            // perform work
             ...
             completion_latch.count_down();
         }));
     }
-    // Block until work is done
     completion_latch.wait();
 }
 
 // Barrier
-void DoWork() {
+void barrierExample()
+{
     ...
-    std::barrier task_barrier(n_threads);
-
-    for (int i = 0; i < n_threads; ++i) {
-        workers.push_back(new thread([&] {
+    std::barrier task_barrier(N);
+    std::vector<std::threads*> worker;
+    for (int i = 0; i < N; ++i)
+    {
+        workers.push_back(new thread([&]
+        {
             bool active = true;
-            while(active) {
+            while(active)
+            {
                 Task task = tasks.get();
 
                 ...
@@ -95,28 +99,32 @@ void DoWork() {
             }
         });
     }
-    while (!finished()) {
+    while (!finished())
+    {
         GetNextStage(tasks);
     }
 }
 
 // Flex barrier
-void DoWork() {
-
-    ...
+void flexBarrierExample()
+{
     int initial_threads;
     atomic<int> current_threads(initial_threads);
-    std::function rf = [&] { return current_threads;};
-    std::flex_barrier task_barrier(n_threads, rf);
+    std::vector<std::threads*> worker;
+    std::function fun = [&] { return current_threads;};
+    std::flex_barrier task_barrier(N, fun);
 
-    for (int i = 0; i < n_threads; ++i) {
+    for (int i = 0; i < N; ++i)
+    {
         workers.push_back(new thread([&] {
             bool active = true;
-            while(active) {
+            while(active)
+            {
                 Task task = tasks.get();
                 // perform task
                 ...
-                if (finished(task)) {
+                if (finished(task))
+                {
                     current_threads--;
                     active = false;
                 }
@@ -124,7 +132,8 @@ void DoWork() {
             }
         });
     }
-    while (!finished()) {
+    while (!finished())
+    {
         GetNextStage(tasks);
     }
 }
@@ -134,21 +143,26 @@ void DoWork() {
 //// COROUTINES
 #pragma region
 
-int func1() {
+int func1()
+{
     return 1;
 }
-int func2(int arg) {
+int func2(int arg)
+{
     return arg;
 }
-double func2(double arg) {
+double func2(double arg)
+{
     return arg;
 }
 template <typename T>
-T func3(T arg) {
+T func3(T arg)
+{
     return arg;
 }
 struct FuncObject4 {
-    int operator()() { // (1)
+    int operator()()
+    {
         return 4;
     }
 };
@@ -167,26 +181,28 @@ void functionsShowOff() {
     func5();
     func6(6);
     func6(6.0);
-
 }
 
 
 std::vector<int> getNumbers(int begin, int end, int inc = 1)
 {
     std::vector<int> numbers;
-    for (int i = begin; i < end; i += inc) {
+    for (int i = begin; i < end; i += inc)
+    {
         numbers.push_back(i);
     }
     return numbers;
 }
 
-int generatorForNumbers(int begin, int inc = 1)
+int generatorForNumbers(int begin, int inc = 1) // mock for compilation purposes
 {
     return begin;
 }
-//generator<int> generatorForNumbers(int begin, int inc = 1) {
+//generator<int> generatorForNumbers(int begin, int inc = 1)
+// {
 //
-//    for (int i = begin;; i += inc) {
+//    for (int i = begin;; i += inc)
+//    {
 //        co_yield i;
 //    }
 //
@@ -195,14 +211,19 @@ int generatorForNumbers(int begin, int inc = 1)
 
 /* Awaitable
 std::suspend_always
-struct suspend_always {
+
+struct suspend_always
+{
     constexpr bool await_ready() const noexcept { return false; }
     constexpr void await_suspend(coroutine_handle<>) const noexcept {}
     constexpr void await_resume() const noexcept {}
 };
 
- struct suspend_never {
-   constexpr bool await_ready() const noexcept { return true; }
+std::suspend_never
+
+struct suspend_never
+{
+    constexpr bool await_ready() const noexcept { return true; }
     constexpr void await_suspend(coroutine_handle<>) const noexcept {}
     constexpr void await_resume() const noexcept {}
 };
@@ -211,8 +232,8 @@ struct suspend_always {
 
 /* Server C++
 Acceptor acceptor{443};
-
-while (true){
+while (true)
+{
     Socket socket= acceptor.accept();
     auto request= socket.read();
     auto response= handleRequest(request);
@@ -220,8 +241,8 @@ while (true){
 }
 
 Acceptor acceptor{443};
-
-while (true){
+while (true)
+{
     Socket socket= co_await acceptor.accept();
     auto request= co_await socket.read();
     auto response= handleRequest(request);
@@ -233,7 +254,7 @@ while (true){
 #pragma endregion
 //// TRANSACTIONAL MEMORY
 #pragma region
-using namespace std::chrono_literals;
+// ZMIENNA GLOBALNA
 int j= 0;
 
 void increment()
@@ -258,10 +279,10 @@ int main()
 
     std::thread reader1([] { getQuantity("chleb"); });
     std::thread reader2([] { getQuantity("piwo"); });
-    std::thread w1([] { addProduct("piwo", 20); });
+    std::thread writter1([] { addProduct("piwo", 20); });
     std::thread reader3([] { getQuantity("papryka"); });
     std::thread reader4([] { getQuantity("piwo"); });
-    std::thread w2([] { addProduct("sledzik", 1); });
+    std::thread writter2([] { addProduct("sledzik", 1); });
     std::thread reader5([] { getQuantity("chleb"); });
     std::thread reader6([] { getQuantity("sledzik"); });
     std::thread reader7([] { getQuantity("piwo"); });
@@ -275,14 +296,14 @@ int main()
     reader6.join();
     reader7.join();
     reader8.join();
-    w1.join();
-    w2.join();
+    writter1.join();
+    writter2.join();
 
     std::cout << std::endl;
 
-    std::cout << "\nThe new telephone book" << std::endl;
-    for (auto teleIt: shoppingList) {
-        std::cout << teleIt.first << ": " << teleIt.second << std::endl;
+    std::cout << "\nNowa lista zakupow:" << std::endl;
+    for (const auto& sList: shoppingList) {
+        std::cout << sList.first << ": " << sList.second << std::endl;
     }
 
     std::cout << std::endl;
@@ -324,6 +345,5 @@ int main()
 
     std::cout << "\n\n";
 #pragma endregion
-
 
 }
