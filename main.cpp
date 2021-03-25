@@ -28,6 +28,7 @@ void getQuantity(const std::string& name){
 
 #pragma region ATOMIC SP
 [[deprecated]]void smart() {
+    //wartosc
     std::shared_ptr<int> ptr = std::make_shared<int>(2011);
     for (auto i = 0;i < 10; i++)
     {
@@ -38,6 +39,7 @@ void getQuantity(const std::string& name){
         ).detach();
     }
 
+    //referencja
     std::shared_ptr<int> ptr1 = std::make_shared<int>(2011);
 
     for (auto i= 0; i<10; i++){
@@ -46,6 +48,7 @@ void getQuantity(const std::string& name){
         }).detach();
     }
 
+    //atomic
     std::shared_ptr<int> ptr2 = std::make_shared<int>(2011);
 
     for (auto i =0;i<10;i++){
@@ -96,10 +99,6 @@ void barrierExample()
             }
         });
     }
-    while (!finished())
-    {
-        GetNextStage(tasks);
-    }
 }
 
 // Flex barrier
@@ -118,7 +117,6 @@ void flexBarrierExample()
             while(active)
             {
                 Task task = tasks.get();
-                // perform task
                 ...
                 if (finished(task))
                 {
@@ -128,10 +126,6 @@ void flexBarrierExample()
                 task_barrier.arrive_and_wait();
             }
         });
-    }
-    while (!finished())
-    {
-        GetNextStage(tasks);
     }
 }
 #endif
@@ -274,16 +268,16 @@ int main()
 
     std::cout << std::endl;
 
-    std::thread reader1([] { getQuantity("chleb"); });
-    std::thread reader2([] { getQuantity("piwo"); });
+    std::thread reader1([] { getQuantity("piwo"); });
+    std::thread reader2([] { getQuantity("chleb"); });
     std::thread writter1([] { addProduct("piwo", 20); });
     std::thread reader3([] { getQuantity("papryka"); });
     std::thread reader4([] { getQuantity("piwo"); });
     std::thread writter2([] { addProduct("sledzik", 1); });
-    std::thread reader5([] { getQuantity("chleb"); });
-    std::thread reader6([] { getQuantity("sledzik"); });
-    std::thread reader7([] { getQuantity("piwo"); });
-    std::thread reader8([] { getQuantity("papryka"); });
+    std::thread reader5([] { getQuantity("piwo"); });
+    std::thread reader6([] { getQuantity("chleb"); });
+    std::thread reader7([] { getQuantity("papryka"); });
+    std::thread reader8([] { getQuantity("sledzik"); });
 
     reader1.join();
     reader2.join();
